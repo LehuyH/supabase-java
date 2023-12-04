@@ -12,17 +12,16 @@ public class PostgrestResponse {
     
     private JSONObject result = new JSONObject();
 
-    public PostgrestResponse(HttpResponse<String> response, boolean isSingle) {
+    public PostgrestResponse(HttpResponse<String> response, boolean isSingle, boolean isCsv){
         result.put("data",null);
         result.put("error",null);
 
         try {
             // Get response code
             Integer responseCode = response.statusCode();
-
             // If response code is 2xx, get response body
             if(responseCode.toString().startsWith("2")){
-                if(isSingle){
+                if(isSingle || isCsv){
                     this.applySingle(response.body(),"data");
                 } else {
                     this.applyArray(response.body(),"data");
@@ -46,7 +45,6 @@ public class PostgrestResponse {
             } catch (Exception e){
                 result.put(key, body);
             }
-
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

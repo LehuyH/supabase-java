@@ -16,6 +16,7 @@ public class PostgrestClient {
     private JSONObject body = new JSONObject();
     private JSONArray bodyArray = new JSONArray();
     private Boolean csv = false;
+    private Boolean isSingle = false;
     private Boolean upsert = false;
 
     private String selectQuery = "*";
@@ -59,7 +60,10 @@ public class PostgrestClient {
             if (this.csv) {
                 requestBuilder.header("Accept", "text/csv");
             }
-            
+
+            if(this.isSingle){
+                requestBuilder.header("Accept", "application/vnd.pgrst.object+json");
+            }
             
             if (this.method != "GET") {
                 String jsonToSend = (this.body.size() > 0) ? this.body.toJSONString() : this.bodyArray.toJSONString();
@@ -72,8 +76,7 @@ public class PostgrestClient {
             }
 
             HttpResponse<String> response = client.send(requestBuilder.build(), HttpResponse.BodyHandlers.ofString());
-
-            return new PostgrestResponse(response, csv).getResult();
+            return new PostgrestResponse(response, isSingle,csv).getResult();
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -302,6 +305,7 @@ public class PostgrestClient {
     }
 
     public PostgrestClient single(){
+        this.isSingle = true;
         addFilter("limit", "1");
 
         return this;
